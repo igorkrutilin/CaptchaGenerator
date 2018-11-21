@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -13,8 +14,8 @@ public class DrawingComponent extends JComponent {
 		String captcha = generator.generate_word();
 		
 		CaptchaGenerator captcha_generator = new CaptchaGenerator();
-		int frame_width = captcha_generator.get_frame_width();
-		int frame_height = captcha_generator.get_frame_height();
+		int frame_width = captcha_generator.WIDTH;
+		int frame_height = captcha_generator.HEIGHT;
 		// </inititalizing>
 		
 		/*
@@ -31,6 +32,14 @@ public class DrawingComponent extends JComponent {
 		char last_char = captcha.charAt(4);
 		int last_char_width = g2d.getFontMetrics().stringWidth(String.valueOf(last_char));
 		int string_width = 40 + last_char_width;
+		
+		/*
+		 * when we want to regenerate captcha for x times, there will be x captchas displayed at once
+		 * so, before drawing new one, we fill our screen with white color
+		 * that will hide previous captchas
+		 */
+		g2d.setColor(new Color(255, 255, 255));
+		g2d.fillRect(0, 0, frame_width, frame_height);
 		
 		// displaying string
 		int pos_y = frame_height / 2 - 100;
