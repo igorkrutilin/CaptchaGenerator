@@ -2,13 +2,20 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
 public class DrawingComponent extends JComponent {
 	public String captcha;
+	public BufferedImage buffered_image;
+	
+	Generator generator = new Generator();
 	
 	private List<String> captchas = new ArrayList<String>();
 	
@@ -20,7 +27,10 @@ public class DrawingComponent extends JComponent {
 		// <initializing>
 		Graphics2D g2d = (Graphics2D) g;
 		
-		Generator generator = new Generator();
+		int image_width = 200;
+		int image_height = 50;
+		this.buffered_image = new BufferedImage(image_width, image_height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2d_bi = this.buffered_image.createGraphics();
 		
 		CaptchaGenerator captcha_generator = new CaptchaGenerator();		
 		int frame_width = captcha_generator.WIDTH;
@@ -55,19 +65,35 @@ public class DrawingComponent extends JComponent {
 			// filling screen
 			g2d.setColor(new Color(255, 255, 255));
 			g2d.fillRect(0, 0, frame_width, frame_height);
+			// doing the same for image
+			g2d_bi.setColor(new Color(255, 255, 255));
+			g2d_bi.fillRect(0, 0, image_width, image_height);
 			
 			// displaying string
 			int pos_y = frame_height / 2 - 100;
+			int pos_y_bi = image_height / 2;
 			for (int i = 0; i < this.captcha.length(); i++) {
-				g2d.setColor(generator.generate_color());
+				Color color = generator.generate_color(); // we will set the same color both for app and for image
+				g2d.setColor(color);
+				g2d_bi.setColor(color);
 				if (i != 4) {
-					g2d.setFont(generator.generate_font());
+					Font font = generator.generate_font(); // we will set the same font both for app and for image
+					g2d.setFont(font);
+					g2d_bi.setFont(font);
 				} else {
 					g2d.setFont(new Font("monospaced", Font.ITALIC, 25));
+					g2d_bi.setFont(new Font("monospaced", Font.ITALIC, 25));
 				}
 				int pos_x = frame_width / 2 - string_width / 2 + i * 10;
+				int pos_x_bi = image_width / 2 - string_width / 2 + i * 10;
 				g2d.drawString(String.valueOf(this.captcha.charAt(i)), pos_x, pos_y);
+				g2d_bi.drawString(String.valueOf(this.captcha.charAt(i)), pos_x_bi, pos_y_bi);
 			}
 		}
+	}
+	
+	public void download() throws IOException {
+		File file = new File(generator.generate_filename());
+		ImageIO.write(buffered_image, "png", file);
 	}
 }

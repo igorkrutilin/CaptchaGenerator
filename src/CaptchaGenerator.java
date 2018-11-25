@@ -2,6 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -14,10 +15,13 @@ class CaptchaGenerator {
 	public final int WIDTH = 400;
 	public final int HEIGHT = 400;
 	
+	public DrawingComponent dc;
+	
 	public String captcha;
 	
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("Captcha Generator");
+		frame.setResizable(false);
 		CaptchaGenerator cg = new CaptchaGenerator();
 		frame.setSize(cg.WIDTH, cg.HEIGHT);
 		
@@ -42,10 +46,21 @@ class CaptchaGenerator {
 			public void actionPerformed(ActionEvent e) {
 				cg.captcha = generator.generate_word();
 				// after each click we create new DrawingComponent; otherwise, we will have the same captcha
-				DrawingComponent dc = new DrawingComponent(cg.captcha);
-				frame.add(dc);
+				cg.dc = new DrawingComponent(cg.captcha);
+				frame.add(cg.dc);
 				frame.setVisible(true);
 				input_captcha.setText("");
+			}
+		});
+		
+		JButton btn_download = new JButton("Download");
+		btn_download.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					cg.dc.download();
+				} catch (IOException exc) {
+					exc.printStackTrace();
+				}
 			}
 		});
 		
@@ -55,13 +70,14 @@ class CaptchaGenerator {
 		horizontal_box.add(input_captcha);
 		horizontal_box.add(btn_submit);
 		horizontal_box.add(btn_new_captcha);
+		horizontal_box.add(btn_download);
 		content.add(horizontal_box, BorderLayout.SOUTH);
 		
 		frame.setContentPane(content);
 		frame.setVisible(true);
 		
 		cg.captcha = generator.generate_word();
-		DrawingComponent dc = new DrawingComponent(cg.captcha);
-		frame.add(dc);
+		cg.dc = new DrawingComponent(cg.captcha);
+		frame.add(cg.dc);
 	}
 }
